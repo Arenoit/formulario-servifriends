@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Formulario de Reparación</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+    }
+    h2 {
+      color: #277576;
+    }
+    .form-container {
+      width: 80%;
+      max-width: 600px;
+      margin: 40px auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    input,
+    select,
+    button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #277576;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #1e5c55;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Formulario de Reparación de Electrodomésticos</h2>
+    <select id="applianceTypeSelect">
+      <option value="">Seleccione el tipo de electrodoméstico</option>
+    </select>
+
+    <select id="repairTypeSelect" style="display: none;"></select>
+
+    <select id="brandSelect" style="display: none;"></select>
+
+    <input type="text" id="serialNumberInput" placeholder="Número de serie del equipo" />
+
+    <button id="fetchManualsBtn">Buscar Manual y Diagrama</button>
+    <div id="manualsResult"></div>
+
+    <button id="calculateCostBtn">Calcular Costo</button>
+    <p id="costResult"></p>
+  </div>
+
+  <script>
+    const applianceOptions = {
+      "Hogar": ["Lavadora", "Refrigerador", "Microondas"],
+      "Industrial": ["Lavadora Industrial", "Refrigerador Comercial", "Freidora Industrial"]
+    };
+
+    const brandOptions = {
+      "Lavadora": ["Samsung", "LG", "Whirlpool"],
+      "Refrigerador": ["Samsung", "Whirlpool", "Bosch"],
+      "Microondas": ["Panasonic", "Samsung", "Sharp"],
+      "Lavadora Industrial": ["Dexter", "Speed Queen"],
+      "Refrigerador Comercial": ["True", "Turbo Air"],
+      "Freidora Industrial": ["Pitco", "Henny Penny"]
+    };
+
+    const applianceTypeSelect = document.getElementById("applianceTypeSelect");
+    const repairTypeSelect = document.getElementById("repairTypeSelect");
+    const brandSelect = document.getElementById("brandSelect");
+    const serialNumberInput = document.getElementById("serialNumberInput");
+    const fetchManualsBtn = document.getElementById("fetchManualsBtn");
+    const calculateCostBtn = document.getElementById("calculateCostBtn");
+    const manualsResult = document.getElementById("manualsResult");
+    const costResult = document.getElementById("costResult");
+
+    // Cargar opciones de tipo de electrodoméstico
+    Object.keys(applianceOptions).forEach(type => {
+      const option = document.createElement("option");
+      option.value = type;
+      option.textContent = type;
+      applianceTypeSelect.appendChild(option);
+    });
+
+    applianceTypeSelect.addEventListener("change", () => {
+      repairTypeSelect.innerHTML = '<option value="">Seleccione el electrodoméstico</option>';
+      brandSelect.innerHTML = '<option value="">Seleccione la marca</option>';
+      brandSelect.style.display = "none";
+      manualsResult.innerHTML = "";
+      costResult.textContent = "";
+
+      const selectedType = applianceTypeSelect.value;
+      if (selectedType) {
+        applianceOptions[selectedType].forEach(item => {
+          const option = document.createElement("option");
+          option.value = item;
+          option.textContent = item;
+          repairTypeSelect.appendChild(option);
+        });
+        repairTypeSelect.style.display = "block";
+      } else {
+        repairTypeSelect.style.display = "none";
+      }
+    });
+
+    repairTypeSelect.addEventListener("change", () => {
+      brandSelect.innerHTML = '<option value="">Seleccione la marca</option>';
+      manualsResult.innerHTML = "";
+      costResult.textContent = "";
+
+      const selectedRepair = repairTypeSelect.value;
+      if (selectedRepair && brandOptions[selectedRepair]) {
+        brandOptions[selectedRepair].forEach(brand => {
+          const option = document.createElement("option");
+          option.value = brand;
+          option.textContent = brand;
+          brandSelect.appendChild(option);
+        });
+        brandSelect.style.display = "block";
+      } else {
+        brandSelect.style.display = "none";
+      }
+    });
+
+    fetchManualsBtn.addEventListener("click", async () => {
+      const brand = brandSelect.value;
+      const serial = serialNumberInput.value;
+      manualsResult.textContent = "Buscando...";
+
+      if (!brand || !serial) {
+        manualsResult.textContent = "Por favor complete la marca y el número de serie.";
+        return;
+      }
+
+      try {
+        // Simulación de llamada a API
+        const response = await fetch(`https://api.searchmanuals.com/${brand}/${serial}`);
+        const data = await response.text(); // o response.json() si es JSON
+        manualsResult.innerHTML = data || "Manual no encontrado.";
+      } catch (err) {
+        manualsResult.textContent = "Hubo un error al obtener los manuales.";
+      }
+    });
+
+    calculateCostBtn.addEventListener("click", () => {
+      costResult.textContent = "Costo estimado: $100";
+    });
+  </script>
+</body>
+</html>
